@@ -1,0 +1,336 @@
+---
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
+jobs:
+  assert-every-dataclass-field-is-read:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install -e .
+      - name: assert-every-dataclass-field-is-read
+        run: >-
+          assert-every-dataclass-field-is-read
+          src
+          --search-in src
+          --search-in test
+          --verbose
+  assert-no-comments:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install assert-no-comments
+      - name: assert-no-comments
+        run: >-
+          assert-no-comments
+          --verbose
+          ${{ github.workspace }}
+  assert-no-inline-directives:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install assert-no-inline-directives
+      - name: assert-no-inline-directives
+        run: >-
+          assert-no-inline-directives
+          --tools pylint,mypy,yamllint
+          --verbose
+          ${{ github.workspace }}/**/*
+  assert-no-linter-config-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install assert-no-linter-config-files
+      - name: assert-no-linter-config-files
+        run: >-
+          assert-no-linter-config-files
+          --linters pylint,mypy,yamllint
+          --verbose
+          ${{ github.workspace }}
+  assert-one-assert-per-pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install assert-one-assert-per-pytest
+      - name: assert-one-assert-per-pytest
+        run: >-
+          assert-one-assert-per-pytest
+          --verbose
+          ${{ github.workspace }}/test
+  assert-python-definition-is-used:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install assert-python-definition-is-used
+      - name: assert-python-definition-is-used
+        run: >-
+          assert-python-definition-is-used
+          src
+          --search-in src
+          --search-in test
+          --verbose
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install pytest -e .
+      - name: E2E tests
+        run: python3 -m pytest test/e2e/ --verbose --pythonwarnings=error
+  integration-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install pytest pytest-cov -e .
+      - name: Integration tests
+        run: |
+          python3 -m pytest test/integration/ \
+            --verbose --pythonwarnings=error \
+            --cov=assert_every_dataclass_field_is_read \
+            --cov-branch \
+            --cov-report=term-missing \
+            --cov-fail-under=100
+  jscpd-src:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install -g jscpd
+      - name: jscpd (src)
+        run: jscpd --pattern "**/*.py" --threshold 0 --reporters console src/
+  jscpd-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: npm install -g jscpd
+      - name: jscpd (test)
+        run: jscpd --pattern "**/*.py" --threshold 0 --reporters console test/
+  mypy-src:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install mypy -e .
+      - name: mypy (src)
+        run: python3 -m mypy --strict src/
+  mypy-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install mypy pytest -e .
+      - name: mypy (test)
+        run: python3 -m mypy test/
+  pylint-src:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install pylint -e .
+      - name: pylint (src)
+        run: >-
+          python3 -m pylint src/
+          --disable=missing-class-docstring
+          --disable=missing-function-docstring
+          --disable=missing-module-docstring
+          --fail-on=C,R,W
+          --fail-under=10.0
+  pylint-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install pylint pytest -e .
+      - name: pylint (test)
+        run: >-
+          python3 -m pylint test/
+          --disable=missing-class-docstring
+          --disable=missing-function-docstring
+          --disable=missing-module-docstring
+          --fail-on=C,R,W
+          --fail-under=10.0
+  release:
+    if: github.event_name == 'push'
+    needs:
+      - assert-every-dataclass-field-is-read
+      - assert-no-comments
+      - assert-no-inline-directives
+      - assert-no-linter-config-files
+      - assert-one-assert-per-pytest
+      - assert-python-definition-is-used
+      - e2e-tests
+      - integration-tests
+      - jscpd-src
+      - jscpd-test
+      - mypy-src
+      - mypy-test
+      - pylint-src
+      - pylint-test
+      - unit-tests
+      - yamllint
+    permissions:
+      contents: write
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - id: version
+        name: Generate version from UTC time
+        run: echo "version=$(date -u +%Y%m%d%H%M%S)" >> $GITHUB_OUTPUT
+      - name: Create tag
+        run: git tag "v${{ steps.version.outputs.version }}"
+      - name: Install build tools
+        run: pip install build
+      - name: Build package
+        run: python -m build
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Push tag
+        run: git push origin "v${{ steps.version.outputs.version }}"
+      - env:
+          GH_TOKEN: ${{ github.token }}
+        name: Create GitHub Release
+        run: |
+          gh release create "v${{ steps.version.outputs.version }}" \
+            --generate-notes
+      - name: Update latest tag
+        run: |
+          git tag -f latest
+          git push origin latest --force
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install pytest pytest-cov -e .
+      - name: Unit tests
+        run: |
+          python3 -m pytest test/unit/ \
+            --verbose --pythonwarnings=error \
+            --cov=assert_every_dataclass_field_is_read \
+            --cov-branch \
+            --cov-report=term-missing \
+            --cov-fail-under=100
+  yamllint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+      - name: Install dependencies
+        run: pip install yamllint
+      - name: yamllint
+        run: |
+          EMPTY_LINES='empty-lines: {max: 0, max-start: 0, max-end: 1}'
+          KEY_ORDERING='key-ordering: enable'
+          TRUTHY='truthy: {allowed-values: ["true", "false", "on"]}'
+          RULES="$EMPTY_LINES, $KEY_ORDERING, $TRUTHY"
+          shopt -s globstar
+          yamllint --strict --format github \
+            --config-data "{extends: default, rules: {$RULES}}" \
+            *.yml **/*.yml
+name: release
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/documentation.yml"
+      - ".github/workflows/release.yml"
+      - "action.yml"
+      - "pyproject.toml"
+      - "src/**"
+      - "test/**"

@@ -1,0 +1,57 @@
+---
+description: Assert every Python dataclass field in a tree is read somewhere
+inputs:
+  assume-read-matching:
+    description: Glob patterns for field names a runtime reads (comma-separated)
+    required: false
+  dont-search-in:
+    description: Template holding {package} to leave out of the search
+    required: false
+  exclude:
+    description: Glob patterns to exclude files (comma-separated)
+    required: false
+  quiet:
+    default: "false"
+    description: Suppress output, exit code only
+    required: false
+  search-in:
+    description: Trees to search for reads, space-separated
+    required: false
+  trees:
+    description: Trees holding the dataclasses to check (space-separated)
+    required: true
+  verbose:
+    default: "false"
+    description: Show trees read, fields found, findings and a summary
+    required: false
+name: Assert Every Dataclass Field Is Read
+runs:
+  steps:
+    - run: python3 -m pip install assert-every-dataclass-field-is-read
+      shell: bash
+    - run: |
+        ARGS=""
+        [ "${{ inputs.quiet }}" = "true" ] && ARGS="$ARGS --quiet"
+        [ "${{ inputs.verbose }}" = "true" ] && ARGS="$ARGS --verbose"
+        if [ -n "${{ inputs.exclude }}" ]; then
+          ARGS="$ARGS --exclude '${{ inputs.exclude }}'"
+        fi
+        if [ -n "${{ inputs.dont-search-in }}" ]; then
+          ARGS="$ARGS --dont-search-in '${{ inputs.dont-search-in }}'"
+        fi
+        if [ -n "${{ inputs.assume-read-matching }}" ]; then
+          ARGS="$ARGS --assume-read-matching"
+          ARGS="$ARGS '${{ inputs.assume-read-matching }}'"
+        fi
+        set -f
+        for tree in ${{ inputs.search-in }}; do
+          ARGS="$ARGS --search-in '$tree'"
+        done
+        TREES=""
+        for tree in ${{ inputs.trees }}; do
+          TREES="$TREES '$tree'"
+        done
+        set +f
+        eval "assert-every-dataclass-field-is-read $ARGS $TREES"
+      shell: bash
+  using: composite
